@@ -1,72 +1,46 @@
-type Prioridad = 'baja' | 'media' | 'alta';
-type Estado = 'pendiente' | 'en proceso' | 'finalizada';
-
-interface Tarea {
-    id: string;
-    titulo: string;
-    descripcion: string;
-    asignatura: string;
-    fechaEntrega: string;
-    prioridad: Prioridad;
-    estado: Estado;
-}
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 class TaskManager {
-    private tasks: Tarea[] = [];
-    private readonly STORAGE_KEY = 'taskcampus_tasks';
-
     constructor() {
+        this.tasks = [];
+        this.STORAGE_KEY = 'taskcampus_tasks';
         this.loadTasks();
     }
-
-    private loadTasks(): void {
+    loadTasks() {
         const stored = localStorage.getItem(this.STORAGE_KEY);
         if (stored) {
             this.tasks = JSON.parse(stored);
         }
     }
-
-    private saveTasks(): void {
+    saveTasks() {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.tasks));
     }
-
-    public addTask(tarea: Omit<Tarea, 'id'>): void {
-        const newTask: Tarea = {
-            ...tarea,
-            id: crypto.randomUUID()
-        };
+    addTask(tarea) {
+        const newTask = Object.assign(Object.assign({}, tarea), { id: crypto.randomUUID() });
         this.tasks.push(newTask);
         this.saveTasks();
     }
-
-    public getTasks(): Tarea[] {
+    getTasks() {
         return this.tasks;
     }
 }
-
 const taskManager = new TaskManager();
-
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('taskForm') as HTMLFormElement;
-    const taskList = document.getElementById('taskList') as HTMLDivElement;
-
+    const form = document.getElementById('taskForm');
+    const taskList = document.getElementById('taskList');
     // Función para dibujar las tareas
     const renderTasks = () => {
         taskList.innerHTML = '';
         const tasks = taskManager.getTasks();
-
         if (tasks.length === 0) {
             taskList.innerHTML = '<p class="text-gray-500 col-span-2">No hay tareas registradas aún.</p>';
             return;
         }
-
         tasks.forEach(tarea => {
             const card = document.createElement('div');
             card.className = 'bg-white p-4 rounded shadow border border-gray-200 flex flex-col justify-between';
-            
-            const colorPrioridad = tarea.prioridad === 'alta' ? 'bg-red-100 text-red-800' : 
-                                   tarea.prioridad === 'media' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800';
-
+            const colorPrioridad = tarea.prioridad === 'alta' ? 'bg-red-100 text-red-800' :
+                tarea.prioridad === 'media' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800';
             card.innerHTML = `
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -84,21 +58,17 @@ document.addEventListener('DOMContentLoaded', () => {
             taskList.appendChild(card);
         });
     };
-
     // Dibujar tareas iniciales
     renderTasks();
-
     // Evento al guardar el formulario
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-
-        const titulo = (document.getElementById('titulo') as HTMLInputElement).value;
-        const descripcion = (document.getElementById('descripcion') as HTMLTextAreaElement).value;
-        const asignatura = (document.getElementById('asignatura') as HTMLInputElement).value;
-        const fechaEntrega = (document.getElementById('fechaEntrega') as HTMLInputElement).value;
-        const prioridad = (document.getElementById('prioridad') as HTMLSelectElement).value as Prioridad;
-        const estado = (document.getElementById('estado') as HTMLSelectElement).value as Estado;
-
+        const titulo = document.getElementById('titulo').value;
+        const descripcion = document.getElementById('descripcion').value;
+        const asignatura = document.getElementById('asignatura').value;
+        const fechaEntrega = document.getElementById('fechaEntrega').value;
+        const prioridad = document.getElementById('prioridad').value;
+        const estado = document.getElementById('estado').value;
         taskManager.addTask({
             titulo,
             descripcion,
@@ -107,8 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
             prioridad,
             estado
         });
-
         form.reset();
         renderTasks(); // Actualiza la lista al instante
     });
 });
+//# sourceMappingURL=app.js.map
