@@ -6,4 +6,4 @@ TaskCampus es una aplicación web diseñada para que los estudiantes universitar
 ## Instalación del frontend
 1. Clonar el repositorio en tu máquina local:
    ```bash
-   git clone [https://github.com/TU_USUARIO/taskcampus.git](https://github.com/TU_USUARIO/taskcampus.git)
+   git clone [https://github.com/xteventexgm/taskcampus.git](https://github.com/xteventexgm/taskcampus.git)
