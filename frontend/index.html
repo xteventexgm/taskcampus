@@ -1,15 +1,69 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TaskCampus</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-8">
-    <div id="app" class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
-        <h1 class="text-2xl font-bold mb-4">TaskCampus - Mis Tareas</h1>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div id="app" class="max-w-4xl mx-auto bg-white p-6 rounded shadow mt-10">
+      <h1 class="text-3xl font-bold mb-6 text-gray-800">TaskCampus</h1>
+
+      <form
+        id="taskForm"
+        class="mb-8 bg-gray-50 p-4 rounded border border-gray-200"
+      >
+        <h2 class="text-xl font-semibold mb-4">Registrar Nueva Tarea</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            type="text"
+            id="titulo"
+            placeholder="Título de la tarea"
+            required
+            class="border p-2 rounded"
+          />
+          <input
+            type="text"
+            id="asignatura"
+            placeholder="Asignatura"
+            required
+            class="border p-2 rounded"
+          />
+
+          <textarea
+            id="descripcion"
+            placeholder="Descripción"
+            class="border p-2 rounded col-span-1 md:col-span-2"
+          ></textarea>
+
+          <input
+            type="date"
+            id="fechaEntrega"
+            required
+            class="border p-2 rounded"
+          />
+
+          <select id="prioridad" class="border p-2 rounded">
+            <option value="baja">Prioridad Baja</option>
+            <option value="media" selected>Prioridad Media</option>
+            <option value="alta">Prioridad Alta</option>
+          </select>
+
+          <select id="estado" class="border p-2 rounded">
+            <option value="pendiente" selected>Pendiente</option>
+            <option value="en proceso">En proceso</option>
+            <option value="finalizada">Finalizada</option>
+          </select>
         </div>
-    <script src="dist/app.js"></script>
-</body>
+        <button
+          type="submit"
+          class="mt-4 w-full bg-blue-600 text-white font-bold px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          Guardar Tarea
+        </button>
+      </form>
+    </div>
+    <script type="module" src="dist/app.js"></script>
+  </body>
 </html>
