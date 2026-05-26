@@ -1,80 +1,55 @@
-type Prioridad = 'baja' | 'media' | 'alta';
-type Estado = 'pendiente' | 'en proceso' | 'finalizada';
-
-interface Tarea {
-    id: string;
-    titulo: string;
-    descripcion: string;
-    asignatura: string;
-    fechaEntrega: string;
-    prioridad: Prioridad;
-    estado: Estado;
-}
-
+"use strict";
 class TaskManager {
-    private tasks: Tarea[] = [];
-    private readonly STORAGE_KEY = 'taskcampus_tasks';
-
     constructor() {
+        this.tasks = [];
+        this.STORAGE_KEY = 'taskcampus_tasks';
         this.loadTasks();
     }
-
-    private loadTasks(): void {
+    loadTasks() {
         const stored = localStorage.getItem(this.STORAGE_KEY);
         if (stored) {
             this.tasks = JSON.parse(stored);
         }
     }
-
-    private saveTasks(): void {
+    saveTasks() {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.tasks));
     }
-
-    public addTask(tarea: Omit<Tarea, 'id'>): void {
-        const newTask: Tarea = { ...tarea, id: crypto.randomUUID() };
+    addTask(tarea) {
+        const newTask = Object.assign(Object.assign({}, tarea), { id: crypto.randomUUID() });
         this.tasks.push(newTask);
         this.saveTasks();
     }
-
-    public getTasks(): Tarea[] {
+    getTasks() {
         return this.tasks;
     }
-
-    public deleteTask(id: string): void {
+    deleteTask(id) {
         this.tasks = this.tasks.filter(task => task.id !== id);
         this.saveTasks();
     }
-
-    public updateTask(id: string, updatedData: Omit<Tarea, 'id'>): void {
+    updateTask(id, updatedData) {
         const index = this.tasks.findIndex(task => task.id === id);
         if (index !== -1) {
-            this.tasks[index] = { ...updatedData, id };
+            this.tasks[index] = Object.assign(Object.assign({}, updatedData), { id });
             this.saveTasks();
         }
     }
 }
-
 const taskManager = new TaskManager();
-
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('taskForm') as HTMLFormElement;
-    const taskList = document.getElementById('taskList') as HTMLDivElement;
-    const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
-    
+    const form = document.getElementById('taskForm');
+    const taskList = document.getElementById('taskList');
+    const submitBtn = form.querySelector('button[type="submit"]');
     // Elementos del Filtro
-    const filtroEstado = document.getElementById('filtroEstado') as HTMLSelectElement;
-    const filtroPrioridad = document.getElementById('filtroPrioridad') as HTMLSelectElement;
-    const filtroAsignatura = document.getElementById('filtroAsignatura') as HTMLInputElement;
-    const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros') as HTMLButtonElement;
-
+    const filtroEstado = document.getElementById('filtroEstado');
+    const filtroPrioridad = document.getElementById('filtroPrioridad');
+    const filtroAsignatura = document.getElementById('filtroAsignatura');
+    const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
     // Elementos del Resumen
-    const resTotal = document.getElementById('resTotal') as HTMLParagraphElement;
-    const resPendientes = document.getElementById('resPendientes') as HTMLParagraphElement;
-    const resFinalizadas = document.getElementById('resFinalizadas') as HTMLParagraphElement;
-    const resAlta = document.getElementById('resAlta') as HTMLParagraphElement;
-
-    let editingTaskId: string | null = null;
-
+    const resTotal = document.getElementById('resTotal');
+    const resPendientes = document.getElementById('resPendientes');
+    const resFinalizadas = document.getElementById('resFinalizadas');
+    const resAlta = document.getElementById('resAlta');
+    let editingTaskId = null;
     // Actualiza las tarjetas de números
     const updateSummary = () => {
         const tasks = taskManager.getTasks();
@@ -83,16 +58,13 @@ document.addEventListener('DOMContentLoaded', () => {
         resFinalizadas.textContent = tasks.filter(t => t.estado === 'finalizada').length.toString();
         resAlta.textContent = tasks.filter(t => t.prioridad === 'alta').length.toString();
     };
-
     const renderTasks = () => {
         taskList.innerHTML = '';
         let tasks = taskManager.getTasks();
-
         // Aplicar los Filtros
         const estadoFilter = filtroEstado.value;
         const prioridadFilter = filtroPrioridad.value;
         const asignaturaFilter = filtroAsignatura.value.toLowerCase().trim();
-
         if (estadoFilter !== 'todos') {
             tasks = tasks.filter(t => t.estado === estadoFilter);
         }
@@ -102,22 +74,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (asignaturaFilter) {
             tasks = tasks.filter(t => t.asignatura.toLowerCase().includes(asignaturaFilter));
         }
-
         // Actualizar estadísticas globales
         updateSummary();
-
         if (tasks.length === 0) {
             taskList.innerHTML = '<p class="text-gray-500 col-span-2 text-center py-4">No se encontraron tareas con estos criterios.</p>';
             return;
         }
-
         tasks.forEach(tarea => {
             const card = document.createElement('div');
             card.className = 'bg-white p-4 rounded shadow border border-gray-200 flex flex-col justify-between hover:shadow-md transition';
-            
-            const colorPrioridad = tarea.prioridad === 'alta' ? 'bg-red-100 text-red-800' : 
-                                   tarea.prioridad === 'media' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800';
-
+            const colorPrioridad = tarea.prioridad === 'alta' ? 'bg-red-100 text-red-800' :
+                tarea.prioridad === 'media' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800';
             card.innerHTML = `
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -138,32 +105,29 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             taskList.appendChild(card);
         });
-
         // Eventos Eliminar
         document.querySelectorAll('.btn-eliminar').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = (e.target as HTMLButtonElement).getAttribute('data-id');
+                const id = e.target.getAttribute('data-id');
                 if (id && confirm('¿Estás seguro de eliminar esta tarea?')) {
                     taskManager.deleteTask(id);
                     renderTasks();
                 }
             });
         });
-
         // Eventos Editar
         document.querySelectorAll('.btn-editar').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = (e.target as HTMLButtonElement).getAttribute('data-id');
+                const id = e.target.getAttribute('data-id');
                 if (id) {
                     const task = taskManager.getTasks().find(t => t.id === id);
                     if (task) {
-                        (document.getElementById('titulo') as HTMLInputElement).value = task.titulo;
-                        (document.getElementById('descripcion') as HTMLTextAreaElement).value = task.descripcion;
-                        (document.getElementById('asignatura') as HTMLInputElement).value = task.asignatura;
-                        (document.getElementById('fechaEntrega') as HTMLInputElement).value = task.fechaEntrega;
-                        (document.getElementById('prioridad') as HTMLSelectElement).value = task.prioridad;
-                        (document.getElementById('estado') as HTMLSelectElement).value = task.estado;
-
+                        document.getElementById('titulo').value = task.titulo;
+                        document.getElementById('descripcion').value = task.descripcion;
+                        document.getElementById('asignatura').value = task.asignatura;
+                        document.getElementById('fechaEntrega').value = task.fechaEntrega;
+                        document.getElementById('prioridad').value = task.prioridad;
+                        document.getElementById('estado').value = task.estado;
                         editingTaskId = id;
                         submitBtn.textContent = 'Actualizar Tarea';
                         submitBtn.classList.replace('bg-blue-600', 'bg-green-600');
@@ -174,12 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     };
-
     // Listeners para los filtros (actualizan la vista al cambiar)
     filtroEstado.addEventListener('change', renderTasks);
     filtroPrioridad.addEventListener('change', renderTasks);
     filtroAsignatura.addEventListener('input', renderTasks);
-    
     // Botón para limpiar filtros
     btnLimpiarFiltros.addEventListener('click', () => {
         filtroEstado.value = 'todos';
@@ -187,31 +149,26 @@ document.addEventListener('DOMContentLoaded', () => {
         filtroAsignatura.value = '';
         renderTasks();
     });
-
     renderTasks();
-
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-
-        const titulo = (document.getElementById('titulo') as HTMLInputElement).value;
-        const descripcion = (document.getElementById('descripcion') as HTMLTextAreaElement).value;
-        const asignatura = (document.getElementById('asignatura') as HTMLInputElement).value;
-        const fechaEntrega = (document.getElementById('fechaEntrega') as HTMLInputElement).value;
-        const prioridad = (document.getElementById('prioridad') as HTMLSelectElement).value as Prioridad;
-        const estado = (document.getElementById('estado') as HTMLSelectElement).value as Estado;
-
+        const titulo = document.getElementById('titulo').value;
+        const descripcion = document.getElementById('descripcion').value;
+        const asignatura = document.getElementById('asignatura').value;
+        const fechaEntrega = document.getElementById('fechaEntrega').value;
+        const prioridad = document.getElementById('prioridad').value;
+        const estado = document.getElementById('estado').value;
         const taskData = { titulo, descripcion, asignatura, fechaEntrega, prioridad, estado };
-
         if (editingTaskId) {
             taskManager.updateTask(editingTaskId, taskData);
             editingTaskId = null;
             submitBtn.textContent = 'Guardar Tarea';
             submitBtn.classList.replace('bg-green-600', 'bg-blue-600');
             submitBtn.classList.replace('hover:bg-green-700', 'hover:bg-blue-700');
-        } else {
+        }
+        else {
             taskManager.addTask(taskData);
         }
-
         form.reset();
         renderTasks();
     });
